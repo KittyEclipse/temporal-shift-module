@@ -257,22 +257,48 @@ def process_output(idx_, history):
 
     return history[-1], history
 
+def gstreamer_pipeline(
+    capture_width=1920,
+    capture_height=1080,
+    display_width=960,
+    display_height=540,
+    framerate=30,
+    flip_method=0,
+):
+    return (
+        "nvarguscamerasrc ! "
+        "video/x-raw(memory:NVMM), "
+        "width=(int)%d, height=(int)%d, framerate=(fraction)%d/1 ! "
+        "nvvidconv flip-method=%d ! "
+        "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
+        "videoconvert ! "
+        "video/x-raw, format=(string)BGR ! appsink drop=True"
+        % (
+            capture_width,
+            capture_height,
+            framerate,
+            flip_method,
+            display_width,
+            display_height,
+        )
+    )
+
 
 WINDOW_NAME = 'Video Gesture Recognition'
 def main():
     print("Open camera...")
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(gstreamer_pipeline(capture_width=320, capture_height=240, display_width=640, display_height=480), cv2.CAP_GSTREAMER)
     
     print(cap)
 
     # set a lower resolution for speed up
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+    #cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+    #cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
 
     # env variables
     full_screen = False
     cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
-    cv2.resizeWindow(WINDOW_NAME, 640, 480)
+    #cv2.resizeWindow(WINDOW_NAME, 640, 480)
     cv2.moveWindow(WINDOW_NAME, 0, 0)
     cv2.setWindowTitle(WINDOW_NAME, WINDOW_NAME)
 
